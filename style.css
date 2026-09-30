@@ -1,0 +1,220 @@
+/* ---------- Design tokens ---------- */
+:root {
+  --color-bg: #f7f6f3;
+  --color-surface: #ffffff;
+  --color-border: #e2ddd3;
+  --color-text: #1f1c16;
+  --color-text-muted: #6b6558;
+  --color-accent: #8b2e2e;      /* muted brick red, ASPI-adjacent think-tank tone */
+  --color-accent-soft: #f3e6e2;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+/* ---------- Header ---------- */
+.site-header {
+  padding: 32px 24px 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.site-header h1 {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+/* ---------- Tabs ---------- */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 16px 24px 0;
+  background: var(--color-surface);
+}
+
+.tab-button {
+  padding: 8px 18px;
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  border-radius: var(--radius) var(--radius) 0 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.tab-button.active {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-surface);
+  margin-bottom: -1px;
+}
+
+/* ---------- Filters ---------- */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.filters input,
+.filters select {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  background: var(--color-bg);
+}
+
+#search-input {
+  flex: 1 1 220px;
+}
+
+.result-count {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ---------- Views ---------- */
+main {
+  padding: 20px 24px 48px;
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+/* ---------- Table view ---------- */
+#tracker-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+#tracker-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: var(--color-accent-soft);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-accent);
+  border-bottom: 1px solid var(--color-border);
+}
+
+#tracker-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+
+#tracker-table tr:last-child td {
+  border-bottom: none;
+}
+
+#tracker-table tr:hover td {
+  background: var(--color-bg);
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.source {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+}
+
+/* ---------- Timeline view ---------- */
+.timeline-month h3 {
+  margin: 28px 0 10px;
+  font-size: 1rem;
+  color: var(--color-accent);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 6px;
+}
+
+.timeline-month:first-child h3 {
+  margin-top: 0;
+}
+
+.timeline-entry {
+  display: flex;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.timeline-date {
+  flex: 0 0 90px;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.timeline-content p {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  #tracker-table thead {
+    display: none;
+  }
+  #tracker-table tr {
+    display: block;
+    padding: 10px 0;
+  }
+  #tracker-table td {
+    display: block;
+    border-bottom: none;
+    padding: 2px 0;
+  }
+  .timeline-entry {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

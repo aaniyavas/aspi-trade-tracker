@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASPI Trade Agreements Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>Non-U.S. Trade Agreements Tracker</h1>
+    <p class="subtitle">Tracking FTAs, CEPAs, and economic integration efforts since January 2026</p>
+  </header>
+
+  <!-- Tabs let us switch between two views of the same underlying data -->
+  <nav class="tabs">
+    <button class="tab-button active" data-tab="table">Table</button>
+    <button class="tab-button" data-tab="timeline">Timeline</button>
+  </nav>
+
+  <!-- Filters are shared across both views -->
+  <section class="filters">
+    <input type="text" id="search-input" placeholder="Search countries, agreements..." />
+
+    <select id="status-filter">
+      <option value="">All Statuses</option>
+    </select>
+
+    <select id="type-filter">
+      <option value="">All Agreement Types</option>
+    </select>
+
+    <select id="month-filter">
+      <option value="">All Months</option>
+    </select>
+
+    <span id="result-count" class="result-count"></span>
+  </section>
+
+  <main>
+    <!-- Table view: shown by default -->
+    <section id="table-view" class="view active">
+      <table id="tracker-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Parties</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Summary</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- Rows get inserted here by JavaScript -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Timeline view: hidden by default -->
+    <section id="timeline-view" class="view">
+      <div id="timeline-container">
+        <!-- Month groups get inserted here by JavaScript -->
+      </div>
+    </section>
+  </main>
+
+  <!-- PapaParse: a small library that turns raw CSV text into JS arrays/objects.
+       Vendored locally (not loaded from a CDN) so the page has no external
+       dependency -- important for embedding on ASPI's site without relying
+       on a third-party server staying up. -->
+  <script src="papaparse.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
