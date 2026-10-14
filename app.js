@@ -10,9 +10,15 @@
   Whenever a filter changes, we re-run steps 3 and 4. That's the whole app.
 */
 
-// This URL will later become your published Google Sheet CSV link.
-// For now it points at the local file so we can build and test offline.
-const DATA_SOURCE = "data/tracker.csv";
+// Live data: the published Google Sheet (CSV format). The intern edits the
+// sheet; this page re-reads it every time it loads. Google caches published
+// sheets for a few minutes, so edits can take ~5 minutes to appear.
+const LIVE_DATA_SOURCE =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJoTxYfRwWejCJVS9KhkNjx46IyxPFDhY5EkO3ytnOHSPHJmOAjVF7MHSiKZLTnooQ7e6IEVHpkbSY/pub?gid=1547077138&single=true&output=csv";
+
+// Safety net: a snapshot of the data stored with the site. Used only if the
+// live sheet can't be reached (sheet unpublished, Google outage, etc.).
+const FALLBACK_DATA_SOURCE = "data/tracker.csv";
 
 // "State" = the single source of truth for what the user has selected right now.
 // Every filter control writes into this object; rendering always reads from it.
@@ -28,19 +34,40 @@ const state = {
 // ---------- 1. LOAD DATA ----------
 
 function loadData() {
-  Papa.parse(DATA_SOURCE, {
+  parseFrom(LIVE_DATA_SOURCE, () => {
+    // Live sheet failed: quietly try the bundled snapshot instead.
+    console.warn("Live sheet unavailable, using bundled snapshot.");
+    parseFrom(FALLBACK_DATA_SOURCE, (err) => {
+      document.getElementById("table-body").innerHTML =
+        `<tr><td colspan="5">Could not load data: ${err.message}</td></tr>`;
+    });
+  });
+}
+
+function parseFrom(url, onFail) {
+  Papa.parse(url, {
     download: true,        // tells PapaParse to fetch the URL itself
     header: true,           // use the first row as column names
     skipEmptyLines: true,
     complete: (results) => {
-      state.allRows = results.data;
+      // Guard against a "successful" fetch that isn't our data (e.g. an
+      // error page): a real tracker row always has a Date and Parties.
+      const rows = results.data.filter((r) => r.Date && r.Parties);
+      if (rows.length === 0) {
+        onFail(new Error("No tracker rows found"));
+        return;
+      }
+      // If the intern leaves a category blank, file the row under
+      // "Uncategorized" so it still shows up (and is easy to spot).
+      rows.forEach((r) => {
+        r.Status_Category = r.Status_Category || "Uncategorized";
+        r.Type_Category = r.Type_Category || "Uncategorized";
+      });
+      state.allRows = rows;
       populateFilterOptions();
       render();
     },
-    error: (err) => {
-      document.getElementById("table-body").innerHTML =
-        `<tr><td colspan="5">Could not load data: ${err.message}</td></tr>`;
-    },
+    error: onFail,
   });
 }
 
