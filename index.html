@@ -17,6 +17,7 @@
   <nav class="tabs">
     <button class="tab-button active" data-tab="table">Table</button>
     <button class="tab-button" data-tab="timeline">Timeline</button>
+    <button class="tab-button" data-tab="map">Map</button>
   </nav>
 
   <!-- Filters are shared across both views -->
@@ -63,6 +64,23 @@
         <!-- Month groups get inserted here by JavaScript -->
       </div>
     </section>
+
+    <!-- Map view: Asia-centred dot map with a side panel (map.js) -->
+    <section id="map-view" class="view">
+      <div class="map-layout">
+        <div id="map-stage" class="map-stage">
+          <svg id="map-svg" viewBox="0 0 960 520" role="img" aria-label="Map of countries and blocs named in the tracker"></svg>
+          <div id="map-tooltip" class="map-tooltip"></div>
+          <div class="map-controls">
+            <button id="map-zoom-in" type="button" aria-label="Zoom in">+</button>
+            <button id="map-zoom-out" type="button" aria-label="Zoom out">&minus;</button>
+            <button id="map-reset" type="button" aria-label="Reset map">&#8962;</button>
+          </div>
+          <div class="map-legend"><span class="lg lg-c"></span>Country <span class="lg lg-b"></span>Bloc &nbsp;|&nbsp; size = number of entries</div>
+        </div>
+        <aside id="map-panel" class="map-panel" aria-live="polite"></aside>
+      </div>
+    </section>
   </main>
 
   <!-- PapaParse: a small library that turns raw CSV text into JS arrays/objects.
@@ -70,6 +88,10 @@
        dependency -- important for embedding on ASPI's site without relying
        on a third-party server staying up. -->
   <script src="papaparse.min.js"></script>
+  <script src="vendor/d3.min.js"></script>
+  <script src="vendor/topojson-client.min.js"></script>
+  <script src="geo.js"></script>
   <script src="app.js"></script>
+  <script src="map.js"></script>
 </body>
 </html>

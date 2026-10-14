@@ -62,3 +62,10 @@ show up automatically.
 4. Embed that URL in ASPI's site with an `<iframe>`, or link to it directly.
 
 No build step, no server to maintain, no separate hosting account needed.
+
+
+## Map view
+
+- `map.js` draws the Asia-centred dot map (D3, vendored in `vendor/`; world shapes in `data/world-110m.json`).
+- `geo.js` lists where each party sits on the map. If a new country or bloc appears in the Sheet's Parties column and has no dot, add one line to `geo.js` (the browser console lists any unplaced names).
+- Palette: ASPI navy `#0b2752`, gold `#ffc600`, black.

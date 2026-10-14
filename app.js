@@ -230,6 +230,7 @@ function render() {
   renderStatusChips();
   renderTable(filtered);
   renderTimeline(filtered);
+  if (typeof renderMap === "function") renderMap(filtered);
 }
 
 function renderStatusChips() {
