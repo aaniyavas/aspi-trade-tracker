@@ -100,11 +100,9 @@ function populateFilterOptions() {
   // We filter on the *_Category columns (a small, controlled set) rather than
   // the raw Status/Agreement_Type text, which has too many one-off variations
   // to make a usable dropdown. See normalize.py for how those are derived.
-  const statuses = uniqueSorted(state.allRows.map((r) => r.Status_Category));
   const types = uniqueSorted(state.allRows.map((r) => r.Type_Category));
   const months = uniqueValuesInDataOrder(state.allRows.map((r) => r.Month));
 
-  fillSelect("status-filter", statuses);
   fillSelect("type-filter", types);
   fillSelect("month-filter", months);
 }
@@ -137,8 +135,12 @@ function setupControls() {
     render();
   });
 
-  document.getElementById("status-filter").addEventListener("change", (e) => {
-    state.statusFilter = e.target.value;
+  // One listener on the chip row handles clicks on any chip (the chips are
+  // redrawn on every render, so we listen on the container, not each chip).
+  document.getElementById("status-chips").addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    state.statusFilter = chip.dataset.status;
     render();
   });
 
@@ -165,14 +167,17 @@ function setupControls() {
 
 // ---------- 3. FILTER ----------
 
-function getFilteredRows() {
+// ignoreStatus lets the chips show how many rows each status WOULD have
+// under the current search/type/month filters.
+function getFilteredRows(ignoreStatus = false) {
   return state.allRows.filter((row) => {
     const matchesSearch =
       !state.searchTerm ||
       row.Parties.toLowerCase().includes(state.searchTerm) ||
       row.Summary.toLowerCase().includes(state.searchTerm);
 
-    const matchesStatus = !state.statusFilter || row.Status_Category === state.statusFilter;
+    const matchesStatus =
+      ignoreStatus || !state.statusFilter || row.Status_Category === state.statusFilter;
     const matchesType = !state.typeFilter || row.Type_Category === state.typeFilter;
     const matchesMonth = !state.monthFilter || row.Month === state.monthFilter;
 
@@ -182,12 +187,73 @@ function getFilteredRows() {
 
 // ---------- 4. RENDER ----------
 
+// Lifecycle order for the status chips, and the color each one uses
+// (the colors themselves live in style.css as .s-planned, .s-signed, ...).
+const STATUS_ORDER = [
+  "Negotiations Launched/Planned",
+  "Negotiations Ongoing",
+  "Negotiations Concluded",
+  "Signed",
+  "In Force",
+  "Talks Stalled/Slowed",
+  "Cooperation/Dialogue",
+  "Other",
+  "Uncategorized",
+];
+
+const STATUS_CLASS = {
+  "Negotiations Launched/Planned": "s-planned",
+  "Negotiations Ongoing": "s-ongoing",
+  "Negotiations Concluded": "s-concluded",
+  "Signed": "s-signed",
+  "In Force": "s-inforce",
+  "Talks Stalled/Slowed": "s-stalled",
+  "Cooperation/Dialogue": "s-coop",
+};
+
+function statusClass(category) {
+  return STATUS_CLASS[category] || "s-other";
+}
+
+// Text from the sheet is data, not HTML. Escape it before putting it in the
+// page so a stray "<" or "&" can't break the layout (or inject anything).
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (c) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+  ));
+}
+
 function render() {
   const filtered = getFilteredRows();
   document.getElementById("result-count").textContent = `${filtered.length} of ${state.allRows.length} entries`;
 
+  renderStatusChips();
   renderTable(filtered);
   renderTimeline(filtered);
+}
+
+function renderStatusChips() {
+  // Counts reflect the other active filters, so the chips always tell you
+  // what you'd get if you clicked them.
+  const base = getFilteredRows(true);
+  const counts = {};
+  base.forEach((r) => { counts[r.Status_Category] = (counts[r.Status_Category] || 0) + 1; });
+
+  // Show categories in lifecycle order; any category not in the list goes last.
+  const present = [...new Set(state.allRows.map((r) => r.Status_Category))];
+  const known = STATUS_ORDER.filter((c) => present.includes(c));
+  const extra = present.filter((c) => !STATUS_ORDER.includes(c)).sort();
+  const categories = [...known, ...extra];
+
+  const chip = (value, label, count, cls, dot) => `
+    <button type="button" class="chip ${cls} ${state.statusFilter === value ? "active" : ""} ${count === 0 ? "empty" : ""}"
+            data-status="${esc(value)}" aria-pressed="${state.statusFilter === value}">
+      ${dot ? '<span class="dot"></span>' : ""}${esc(label)} <span class="count">${count}</span>
+    </button>`;
+
+  document.getElementById("status-chips").innerHTML =
+    chip("", "All", base.length, "", false) +
+    categories.map((c) => chip(c, c, counts[c] || 0, statusClass(c), true)).join("");
 }
 
 function renderTable(rows) {
@@ -196,11 +262,11 @@ function renderTable(rows) {
     .map(
       (row) => `
     <tr>
-      <td class="nowrap">${row.Date}</td>
-      <td>${row.Parties}</td>
-      <td>${row.Agreement_Type}</td>
-      <td><span class="status-badge">${row.Status}</span></td>
-      <td>${row.Summary} <span class="source">(${row.Source})</span></td>
+      <td class="nowrap">${esc(row.Date)}</td>
+      <td>${esc(row.Parties)}</td>
+      <td>${esc(row.Agreement_Type)}</td>
+      <td><span class="status-badge ${statusClass(row.Status_Category)}">${esc(row.Status)}</span></td>
+      <td>${esc(row.Summary)} <span class="source">(${esc(row.Source)})</span></td>
     </tr>
   `
     )
@@ -221,16 +287,16 @@ function renderTimeline(rows) {
     .map(
       ([month, monthRows]) => `
     <div class="timeline-month">
-      <h3>${month}</h3>
+      <h3>${esc(month)}</h3>
       ${monthRows
         .map(
           (row) => `
         <div class="timeline-entry">
-          <div class="timeline-date">${row.Date}</div>
+          <div class="timeline-date">${esc(row.Date)}</div>
           <div class="timeline-content">
-            <strong>${row.Parties}</strong> &middot; ${row.Agreement_Type} &middot;
-            <span class="status-badge">${row.Status}</span>
-            <p>${row.Summary} <span class="source">(${row.Source})</span></p>
+            <strong>${esc(row.Parties)}</strong> &middot; ${esc(row.Agreement_Type)} &middot;
+            <span class="status-badge ${statusClass(row.Status_Category)}">${esc(row.Status)}</span>
+            <p>${esc(row.Summary)} <span class="source">(${esc(row.Source)})</span></p>
           </div>
         </div>
       `

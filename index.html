@@ -23,10 +23,6 @@
   <section class="filters">
     <input type="text" id="search-input" placeholder="Search countries, agreements..." />
 
-    <select id="status-filter">
-      <option value="">All Statuses</option>
-    </select>
-
     <select id="type-filter">
       <option value="">All Agreement Types</option>
     </select>
@@ -37,6 +33,10 @@
 
     <span id="result-count" class="result-count"></span>
   </section>
+
+  <!-- Status chips: one click filters by where an agreement is in its lifecycle.
+       The buttons are drawn by app.js (renderStatusChips). -->
+  <section id="status-chips" class="chips-row" aria-label="Filter by status"></section>
 
   <main>
     <!-- Table view: shown by default -->

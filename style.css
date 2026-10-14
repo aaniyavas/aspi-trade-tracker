@@ -92,6 +92,77 @@ body {
   flex: 1 1 220px;
 }
 
+/* ---------- Status colors (one per lifecycle stage) ---------- */
+:root {
+  --s-planned-bg: #e3edf7;  --s-planned-fg: #1d4a73;  --s-planned-dot: #3b82c4;
+  --s-ongoing-bg: #dff0f2;  --s-ongoing-fg: #14565e;  --s-ongoing-dot: #2a9aa8;
+  --s-concluded-bg: #fbefd5; --s-concluded-fg: #6e4a00; --s-concluded-dot: #d99a1e;
+  --s-signed-bg: #e0f0e1;   --s-signed-fg: #1f5c2a;   --s-signed-dot: #3a9d4a;
+  --s-inforce-bg: #1f6b2c;  --s-inforce-fg: #ffffff;  --s-inforce-dot: #1f6b2c;
+  --s-stalled-bg: #f9dfdc;  --s-stalled-fg: #8a1f17;  --s-stalled-dot: #c8372d;
+  --s-coop-bg: #ecebf5;     --s-coop-fg: #433f7a;     --s-coop-dot: #7a74c4;
+  --s-other-bg: #ececea;    --s-other-fg: #55524b;    --s-other-dot: #9a968c;
+}
+
+.s-planned   { --bg: var(--s-planned-bg);   --fg: var(--s-planned-fg);   --dot: var(--s-planned-dot); }
+.s-ongoing   { --bg: var(--s-ongoing-bg);   --fg: var(--s-ongoing-fg);   --dot: var(--s-ongoing-dot); }
+.s-concluded { --bg: var(--s-concluded-bg); --fg: var(--s-concluded-fg); --dot: var(--s-concluded-dot); }
+.s-signed    { --bg: var(--s-signed-bg);    --fg: var(--s-signed-fg);    --dot: var(--s-signed-dot); }
+.s-inforce   { --bg: var(--s-inforce-bg);   --fg: var(--s-inforce-fg);   --dot: var(--s-inforce-dot); }
+.s-stalled   { --bg: var(--s-stalled-bg);   --fg: var(--s-stalled-fg);   --dot: var(--s-stalled-dot); }
+.s-coop      { --bg: var(--s-coop-bg);      --fg: var(--s-coop-fg);      --dot: var(--s-coop-dot); }
+.s-other     { --bg: var(--s-other-bg);     --fg: var(--s-other-fg);     --dot: var(--s-other-dot); }
+
+/* ---------- Status chips ---------- */
+.chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.chip:hover { border-color: var(--color-text-muted); }
+
+.chip .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--dot, var(--color-text-muted));
+}
+
+.chip .count {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.chip.active {
+  background: var(--bg, var(--color-text));
+  color: var(--fg, var(--color-surface));
+  border-color: var(--dot, var(--color-text));
+  font-weight: 600;
+}
+
+.chip.active .count { color: inherit; }
+.chip.active .dot { background: var(--fg, var(--color-surface)); }
+.chip:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.chip.empty:not(.active) { opacity: 0.45; }
+
 .result-count {
   margin-left: auto;
   font-size: 0.85rem;
@@ -156,8 +227,8 @@ main {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
+  background: var(--bg, var(--color-accent-soft));
+  color: var(--fg, var(--color-accent));
   font-size: 0.78rem;
   white-space: nowrap;
 }
