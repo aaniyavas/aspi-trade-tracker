@@ -57,18 +57,41 @@ function parseFrom(url, onFail) {
         onFail(new Error("No tracker rows found"));
         return;
       }
-      // If the intern leaves a category blank, file the row under
-      // "Uncategorized" so it still shows up (and is easy to spot).
       rows.forEach((r) => {
+        // Google Sheets can turn "2026-10-07" into a real date and publish it
+        // as "10/7/2026". Normalize either form to YYYY-MM-DD.
+        r.Date = normalizeDate(r.Date);
+        // Work out the month from the date, so nobody has to type it.
+        r.Month = monthLabel(r.Date);
+        // If a category is blank, file the row under "Uncategorized" so it
+        // still shows up (and is easy to spot).
         r.Status_Category = r.Status_Category || "Uncategorized";
         r.Type_Category = r.Type_Category || "Uncategorized";
       });
+      // Newest first, regardless of where a row sits in the sheet.
+      // (YYYY-MM-DD text sorts correctly as plain text.)
+      rows.sort((a, b) => (a.Date < b.Date ? 1 : a.Date > b.Date ? -1 : 0));
       state.allRows = rows;
       populateFilterOptions();
       render();
     },
     error: onFail,
   });
+}
+
+function normalizeDate(value) {
+  const v = (value || "").trim();
+  const us = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); // M/D/YYYY
+  if (us) return `${us[3]}-${us[1].padStart(2, "0")}-${us[2].padStart(2, "0")}`;
+  return v.slice(0, 10); // already YYYY-MM-DD (drops any time part)
+}
+
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"];
+
+function monthLabel(isoDate) {
+  const m = parseInt(isoDate.slice(5, 7), 10);
+  return m >= 1 && m <= 12 ? `${MONTH_NAMES[m - 1]} ${isoDate.slice(0, 4)}` : "Unknown date";
 }
 
 // Build the dropdown options dynamically from whatever values actually
